@@ -31,6 +31,10 @@ public class TaskManager {
         return new ArrayList<>(tasks.values());
     }
 
+    public List<Task> getAllSubTasks() {
+        return new ArrayList<>(subTasks.values());
+    }
+
     public List<SubTask> getAllSubTasksForEpic(Integer epicId) {
         return epics.get(epicId).getSubTasks();
     }
@@ -58,4 +62,18 @@ public class TaskManager {
             return false;
         }
     }
+
+    public Task getTaskById(Integer taskId) {
+        return tasks.get(taskId);
+    }
+
+    public Epic getEpicById(Integer epicId) {
+        return epics.get(epicId);
+    }
+
+    public SubTask getSubTaskById(Integer subTaskId) {
+        return subTasks.get(subTaskId);
+    }
+
+
 }
