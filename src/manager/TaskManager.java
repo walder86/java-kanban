@@ -52,7 +52,7 @@ public class TaskManager {
     }
 
     public boolean addSubTask(SubTask subTask, Integer epicId) {
-        Epic epic = epics.get(epicId);
+        Epic epic = this.epics.get(epicId);
         if (epic != null) {
             epic.getSubTasks().add(subTask);
             System.out.println("Подзадача успешно добавлена");
@@ -75,5 +75,27 @@ public class TaskManager {
         return subTasks.get(subTaskId);
     }
 
+    public void updateTask(Task task) {
+        Task taskForUpdate = tasks.get(task.getId());
+        taskForUpdate.setName(task.getName());
+        taskForUpdate.setDescription(task.getDescription());
+        taskForUpdate.setStatus(task.getStatus());
+    }
+
+    public void updateEpic(Epic epic) {
+        Epic epicForUpdate = epics.get(epic.getId());
+        epicForUpdate.setName(epic.getName());
+        epicForUpdate.setDescription(epic.getDescription());
+        epicForUpdate.setSubTasks(epic.getSubTasks());
+        epicForUpdate.setStatus();
+    }
+
+    public void updateSubTask(SubTask subTask) {
+        SubTask subTaskForUpdate = subTasks.get(subTask.getId());
+        subTaskForUpdate.setName(subTask.getName());
+        subTaskForUpdate.setDescription(subTask.getDescription());
+        subTaskForUpdate.setStatus(subTask.getStatus());
+        epics.get(subTask.getEpicId()).setStatus();
+    }
 
 }
