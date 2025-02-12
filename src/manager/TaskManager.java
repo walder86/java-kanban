@@ -46,15 +46,16 @@ public class TaskManager {
     }
 
     public boolean addEpic(Epic epic) {
-        tasks.put(epic.getId(), epic);
+        epics.put(epic.getId(), epic);
         System.out.println("Эпик успешно добавлен");
         return true;
     }
 
-    public boolean addSubTask(SubTask subTask, Integer epicId) {
-        Epic epic = this.epics.get(epicId);
+    public boolean addSubTask(SubTask subTask) {
+        Epic epic = this.epics.get(subTask.getEpicId());
         if (epic != null) {
             epic.getSubTasks().add(subTask);
+            subTasks.put(subTask.getId(), subTask);
             System.out.println("Подзадача успешно добавлена");
             return true;
         } else {
@@ -120,7 +121,8 @@ public class TaskManager {
     }
 
     public void removeEpicById(Integer epicId) {
-        for (SubTask subTask : epics.get(epicId).getSubTasks()) {
+        Epic epic = epics.get(epicId);
+        for (SubTask subTask : epic.getSubTasks()) {
             subTasks.remove(subTask.getId());
         }
         epics.remove(epicId);
@@ -128,6 +130,10 @@ public class TaskManager {
     }
 
     public void removeSubTaskById(Integer subTaskId) {
+        SubTask subTask = subTasks.get(subTaskId);
+        Epic epic = epics.get(subTask.getEpicId());
+        epic.getSubTasks().remove(subTask);
+        epic.setStatus();
         subTasks.remove(subTaskId);
         System.out.println("Подзадача с ID = " + subTaskId + " была удалена");
     }
