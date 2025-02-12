@@ -2,18 +2,15 @@ package typeTasks;
 
 public class SubTask extends Task{
 
-    private Epic epic;
+    private Integer epicId;
 
-    public SubTask(String name, String description) {
+    public SubTask(String name, String description, Integer epicId) {
         super(name, description);
+        this.epicId = epicId;
     }
 
-    public Epic getEpic() {
-        return epic;
-    }
-
-    public void setEpic(Epic epic) {
-        this.epic = epic;
+    public Integer getEpicId() {
+        return epicId;
     }
 
     @Override
