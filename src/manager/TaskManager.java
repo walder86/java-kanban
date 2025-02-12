@@ -98,4 +98,38 @@ public class TaskManager {
         epics.get(subTask.getEpicId()).setStatus();
     }
 
+    public void removeAllTasks() {
+        tasks.clear();
+        System.out.println("Все задачи удалены");
+    }
+
+    public void removeAllEpics() {
+        epics.clear();
+        subTasks.clear();
+        System.out.println("Все эпики удалены");
+    }
+
+    public void removeAllSubTasks() {
+        subTasks.clear();
+        System.out.println("Все подзадачи удалены");
+    }
+
+    public void removeTaskById(Integer taskId) {
+        tasks.remove(taskId);
+        System.out.println("Задача с ID = " + taskId + " была удалена");
+    }
+
+    public void removeEpicById(Integer epicId) {
+        for (SubTask subTask : epics.get(epicId).getSubTasks()) {
+            subTasks.remove(subTask.getId());
+        }
+        epics.remove(epicId);
+        System.out.println("Эпик с ID = " + epicId + " был удален");
+    }
+
+    public void removeSubTaskById(Integer subTaskId) {
+        subTasks.remove(subTaskId);
+        System.out.println("Подзадача с ID = " + subTaskId + " была удалена");
+    }
+
 }
