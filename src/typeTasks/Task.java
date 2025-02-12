@@ -1,20 +1,29 @@
 package typeTasks;
 
 import enumeration.Status;
+import manager.TaskManager;
 
 import java.util.Objects;
 
 public class Task {
+
     protected Integer id;
     protected String name;
     protected String description;
     protected Status status;
 
-    public int getId() {
+    public Task(String name, String description) {
+        this.id = TaskManager.countTasks++;
+        this.name = name;
+        this.description = description;
+        this.status = Status.NEW;
+    }
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -56,5 +65,15 @@ public class Task {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, description, status);
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                '}';
     }
 }
