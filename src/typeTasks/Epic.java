@@ -27,23 +27,27 @@ public class Epic extends Task{
             this.status = Status.NEW;
             return;
         }
+        int countDone = 0;
         for (SubTask subTask : subTasks) {
-            if (subTask.getStatus() == Status.IN_PROGRESS) {
-                this.status = Status.IN_PROGRESS;
-                return;
+            if (subTask.getStatus() == Status.DONE) {
+                countDone++;
             }
         }
-        this.status = Status.DONE;
+        if (countDone == subTasks.size()) {
+            this.status = Status.DONE;
+            return;
+        }
+        this.status = Status.IN_PROGRESS;
     }
 
     @Override
     public String toString() {
         return "Epic{" +
-                "subTasks=" + subTasks +
-                ", id=" + id +
+                "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", status=" + status +
+                ", subTasks=" + subTasks +
                 '}';
     }
 }
