@@ -1,7 +1,6 @@
 package typeTasks;
 
 import enumeration.Status;
-import manager.TaskManager;
 
 import java.util.Objects;
 
@@ -12,15 +11,18 @@ public class Task {
     protected String description;
     protected Status status;
 
-    public Task(String name, String description) {
-        this.id = TaskManager.countTasks++;
+    public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
-        this.status = Status.NEW;
+        this.status = status;
     }
 
     public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getName() {

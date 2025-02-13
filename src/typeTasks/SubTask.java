@@ -1,11 +1,13 @@
 package typeTasks;
 
+import enumeration.Status;
+
 public class SubTask extends Task{
 
     private Integer epicId;
 
-    public SubTask(String name, String description, Integer epicId) {
-        super(name, description);
+    public SubTask(String name, String description, Integer epicId, Status status) {
+        super(name, description, status);
         this.epicId = epicId;
     }
 

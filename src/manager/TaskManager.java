@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class TaskManager {
 
-    public static Integer countTasks = 1;
+    private Integer countTasks = 1;
 
     private Map<Integer, Epic> epics;
     private Map<Integer, Task> tasks;
@@ -40,18 +40,21 @@ public class TaskManager {
     }
 
     public boolean addTask(Task task) {
+        task.setId(countTasks++);
         tasks.put(task.getId(), task);
         System.out.println("Задача успешно добавлена");
         return true;
     }
 
     public boolean addEpic(Epic epic) {
+        epic.setId(countTasks++);
         epics.put(epic.getId(), epic);
         System.out.println("Эпик успешно добавлен");
         return true;
     }
 
     public boolean addSubTask(SubTask subTask) {
+        subTask.setId(countTasks++);
         Epic epic = this.epics.get(subTask.getEpicId());
         if (epic != null) {
             epic.getSubTasks().add(subTask);
@@ -87,7 +90,6 @@ public class TaskManager {
         Epic epicForUpdate = epics.get(epic.getId());
         epicForUpdate.setName(epic.getName());
         epicForUpdate.setDescription(epic.getDescription());
-        epicForUpdate.setSubTasks(epic.getSubTasks());
         epicForUpdate.setStatus();
     }
 
