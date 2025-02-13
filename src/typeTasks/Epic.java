@@ -18,7 +18,7 @@ public class Epic extends Task{
         return new ArrayList<>(subTasks);
     }
 
-    public void setStatus() {
+    public void changeStatus() {
         if (subTasks.isEmpty()) {
             this.status = Status.NEW;
             return;

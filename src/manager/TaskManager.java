@@ -36,7 +36,12 @@ public class TaskManager {
     }
 
     public List<SubTask> getAllSubTasksForEpic(Integer epicId) {
-        return epics.get(epicId).getSubTasks();
+        Epic epic = epics.get(epicId);
+        if (epic == null) {
+            System.out.println("Эпик не найден по ID = " + epicId);
+            return new ArrayList<>();
+        }
+        return epic.getSubTasks();
     }
 
     public boolean addTask(Task task) {
@@ -55,10 +60,12 @@ public class TaskManager {
 
     public boolean addSubTask(SubTask subTask) {
         subTask.setId(countTasks++);
+
         Epic epic = this.epics.get(subTask.getEpicId());
         if (epic != null) {
-            epic.getSubTasks().add(subTask);
+            epic.addSubTask(subTask);
             subTasks.put(subTask.getId(), subTask);
+            epic.changeStatus();
             System.out.println("Подзадача успешно добавлена");
             return true;
         } else {
@@ -80,25 +87,47 @@ public class TaskManager {
     }
 
     public void updateTask(Task task) {
-        Task taskForUpdate = tasks.get(task.getId());
-        taskForUpdate.setName(task.getName());
-        taskForUpdate.setDescription(task.getDescription());
-        taskForUpdate.setStatus(task.getStatus());
+        if (tasks.get(task.getId()) == null) {
+            System.out.println("Задача не найдена. Для добавления воспользуйтесь другим методом");
+            return;
+        }
+        tasks.put(task.getId(), task);
     }
 
     public void updateEpic(Epic epic) {
         Epic epicForUpdate = epics.get(epic.getId());
+        if (epicForUpdate == null) {
+            System.out.println("Эпик не найден. Для добавления воспользуйтесь другим методом");
+            return;
+        }
         epicForUpdate.setName(epic.getName());
         epicForUpdate.setDescription(epic.getDescription());
-        epicForUpdate.setStatus();
     }
 
     public void updateSubTask(SubTask subTask) {
-        SubTask subTaskForUpdate = subTasks.get(subTask.getId());
-        subTaskForUpdate.setName(subTask.getName());
-        subTaskForUpdate.setDescription(subTask.getDescription());
-        subTaskForUpdate.setStatus(subTask.getStatus());
-        epics.get(subTask.getEpicId()).setStatus();
+        SubTask existingSubTask = subTasks.get(subTask.getId());
+        if (existingSubTask == null) {
+            System.out.println("Подзадача не найдена. Для добавления воспользуйтесь другим методом");
+            return;
+        }
+        if (!subTask.getEpicId().equals(existingSubTask.getEpicId())) {
+            System.out.println("Данная подзадача относится к другому эпику");
+            return;
+        }
+
+        Epic epic = epics.get(subTask.getEpicId());
+        //подзадача не может существовать без эпика, поэтому исключается NPE
+        List<SubTask> epicSubTasks = epic.getSubTasks();
+        epicSubTasks.remove(existingSubTask);
+        epicSubTasks.add(subTask);
+
+        //не обновляем id, так как они равны (первое условие)
+        //не обновляем epicId, так как они равны
+        existingSubTask.setName(subTask.getName());
+        existingSubTask.setDescription(subTask.getDescription());
+        existingSubTask.setStatus(subTask.getStatus());
+
+        epic.changeStatus();
     }
 
     public void removeAllTasks() {
@@ -113,6 +142,10 @@ public class TaskManager {
     }
 
     public void removeAllSubTasks() {
+        for (Epic epic : epics.values()) {
+            epic.clearSubTasks();
+            epic.changeStatus();
+        }
         subTasks.clear();
         System.out.println("Все подзадачи удалены");
     }
@@ -124,6 +157,10 @@ public class TaskManager {
 
     public void removeEpicById(Integer epicId) {
         Epic epic = epics.get(epicId);
+        if (epic == null) {
+            System.out.println("Эпик не найден");
+            return;
+        }
         for (SubTask subTask : epic.getSubTasks()) {
             subTasks.remove(subTask.getId());
         }
@@ -133,9 +170,14 @@ public class TaskManager {
 
     public void removeSubTaskById(Integer subTaskId) {
         SubTask subTask = subTasks.get(subTaskId);
+        if (subTask == null) {
+            System.out.println("Подзадача не найдена");
+            return;
+        }
         Epic epic = epics.get(subTask.getEpicId());
-        epic.getSubTasks().remove(subTask);
-        epic.setStatus();
+        //подзадача не может существовать без эпика, поэтому исключается NPE
+        epic.removeSubTask(subTask);
+        epic.changeStatus();
         subTasks.remove(subTaskId);
         System.out.println("Подзадача с ID = " + subTaskId + " была удалена");
     }
