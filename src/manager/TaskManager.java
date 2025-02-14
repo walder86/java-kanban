@@ -59,10 +59,9 @@ public class TaskManager {
     }
 
     public boolean addSubTask(SubTask subTask) {
-        subTask.setId(countTasks++);
-
         Epic epic = this.epics.get(subTask.getEpicId());
         if (epic != null) {
+            subTask.setId(countTasks++);
             epic.addSubTask(subTask);
             subTasks.put(subTask.getId(), subTask);
             epic.changeStatus();
