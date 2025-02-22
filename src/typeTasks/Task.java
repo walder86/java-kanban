@@ -4,7 +4,7 @@ import enumeration.Status;
 
 import java.util.Objects;
 
-public abstract class Task {
+public class Task {
 
     protected Integer id;
     protected String name;

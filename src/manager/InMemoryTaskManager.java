@@ -50,10 +50,14 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public boolean addTask(Task task) {
-        task.setId(countTasks++);
-        tasks.put(task.getId(), task);
-        System.out.println("Задача успешно добавлена");
-        return true;
+        if (task.getClass() == Task.class) {
+            task.setId(countTasks++);
+            tasks.put(task.getId(), task);
+            System.out.println("Задача успешно добавлена");
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
