@@ -9,6 +9,9 @@ public class Epic extends Task{
 
     private List<SubTask> subTasks;
 
+    private Epic() {
+    }
+
     public Epic(String name, String description) {
         super(name, description, Status.NEW);
         this.subTasks = new ArrayList<>();
@@ -16,6 +19,10 @@ public class Epic extends Task{
 
     public List<SubTask> getSubTasks() {
         return new ArrayList<>(subTasks);
+    }
+
+    private void setSubTasks(List<SubTask> subTasks) {
+        this.subTasks = subTasks;
     }
 
     public void changeStatus() {
@@ -62,8 +69,29 @@ public class Epic extends Task{
             System.out.println("Подзадача относится к другому эпику");
             return false;
         }
-        subTasks.remove(subTask);
+        SubTask subTaskForDelete = null;
+        for (SubTask subTaskIter : subTasks) {
+            if (subTaskIter.getId().equals(subTask.getId())) {
+                subTaskForDelete = subTaskIter;
+                break;
+            }
+        }
+        if (subTaskForDelete == null) {
+            System.out.println("Не была найдена задача по ИД для эпика");
+            return false;
+        }
+        subTasks.remove(subTaskForDelete);
         return true;
+    }
+
+    public Epic clone() {
+        Epic epic = new Epic();
+        epic.setId(this.id);
+        epic.setName(this.name);
+        epic.setDescription(this.description);
+        epic.setStatus(this.status);
+        epic.setSubTasks(this.subTasks);
+        return epic;
     }
 
     @Override

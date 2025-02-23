@@ -15,11 +15,11 @@ public interface TaskManager {
 
     List<SubTask> getAllSubTasksForEpic(Integer epicId);
 
-    boolean addTask(Task task);
+    Boolean addTask(Task task);
 
-    boolean addEpic(Epic epic);
+    Boolean addEpic(Epic epic);
 
-    boolean addSubTask(SubTask subTask);
+    Boolean addSubTask(SubTask subTask);
 
     Task getTaskById(Integer taskId);
 
@@ -27,11 +27,11 @@ public interface TaskManager {
 
     SubTask getSubTaskById(Integer subTaskId);
 
-    void updateTask(Task task);
+    Boolean updateTask(Task task);
 
-    void updateEpic(Epic epic);
+    Boolean updateEpic(Epic epic);
 
-    void updateSubTask(SubTask subTask);
+    Boolean updateSubTask(SubTask subTask);
 
     void removeAllTasks();
 

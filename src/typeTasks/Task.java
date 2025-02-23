@@ -11,6 +11,10 @@ public class Task {
     protected String description;
     protected Status status;
 
+    protected Task() {
+
+    }
+
     public Task(String name, String description, Status status) {
         this.name = name;
         this.description = description;
@@ -47,6 +51,15 @@ public class Task {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public Task clone() {
+        Task task = new Task();
+        task.setId(this.id);
+        task.setName(this.name);
+        task.setDescription(this.description);
+        task.setStatus(this.status);
+        return task;
     }
 
     @Override

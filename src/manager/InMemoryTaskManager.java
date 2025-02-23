@@ -49,10 +49,10 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public boolean addTask(Task task) {
+    public Boolean addTask(Task task) {
         if (task.getClass() == Task.class) {
             task.setId(countTasks++);
-            tasks.put(task.getId(), task);
+            tasks.put(task.getId(), task.clone());
             System.out.println("Задача успешно добавлена");
             return true;
         } else {
@@ -61,19 +61,19 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public boolean addEpic(Epic epic) {
+    public Boolean addEpic(Epic epic) {
         epic.setId(countTasks++);
-        epics.put(epic.getId(), epic);
+        epics.put(epic.getId(), epic.clone());
         System.out.println("Эпик успешно добавлен");
         return true;
     }
 
     @Override
-    public boolean addSubTask(SubTask subTask) {
+    public Boolean addSubTask(SubTask subTask) {
         Epic epic = this.epics.get(subTask.getEpicId());
         if (epic != null) {
             subTask.setId(countTasks++);
-            epic.addSubTask(subTask);
+            epic.addSubTask(subTask.clone());
             subTasks.put(subTask.getId(), subTask);
             epic.changeStatus();
             System.out.println("Подзадача успешно добавлена");
@@ -106,42 +106,47 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void updateTask(Task task) {
+    public Boolean updateTask(Task task) {
+        if (task.getClass() != Task.class) {
+            System.out.println("Нельзя обновлять эпики и задачи в методе обновления задач");
+            return false;
+        }
         if (tasks.get(task.getId()) == null) {
             System.out.println("Задача не найдена. Для добавления воспользуйтесь другим методом");
-            return;
+            return false;
         }
         tasks.put(task.getId(), task);
+        return true;
     }
 
     @Override
-    public void updateEpic(Epic epic) {
+    public Boolean updateEpic(Epic epic) {
         Epic epicForUpdate = epics.get(epic.getId());
         if (epicForUpdate == null) {
             System.out.println("Эпик не найден. Для добавления воспользуйтесь другим методом");
-            return;
+            return false;
         }
         epicForUpdate.setName(epic.getName());
         epicForUpdate.setDescription(epic.getDescription());
+        return true;
     }
 
     @Override
-    public void updateSubTask(SubTask subTask) {
+    public Boolean updateSubTask(SubTask subTask) {
         SubTask existingSubTask = subTasks.get(subTask.getId());
         if (existingSubTask == null) {
             System.out.println("Подзадача не найдена. Для добавления воспользуйтесь другим методом");
-            return;
+            return false;
         }
         if (!subTask.getEpicId().equals(existingSubTask.getEpicId())) {
             System.out.println("Данная подзадача относится к другому эпику");
-            return;
+            return false;
         }
 
         Epic epic = epics.get(subTask.getEpicId());
         //подзадача не может существовать без эпика, поэтому исключается NPE
-        List<SubTask> epicSubTasks = epic.getSubTasks();
-        epicSubTasks.remove(existingSubTask);
-        epicSubTasks.add(subTask);
+        epic.removeSubTask(subTask);
+        epic.addSubTask(subTask.clone());
 
         //не обновляем id, так как они равны (первое условие)
         //не обновляем epicId, так как они равны
@@ -150,6 +155,7 @@ public class InMemoryTaskManager implements TaskManager {
         existingSubTask.setStatus(subTask.getStatus());
 
         epic.changeStatus();
+        return true;
     }
 
     @Override
