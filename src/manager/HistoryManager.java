@@ -10,4 +10,5 @@ public interface HistoryManager {
 
     public ArrayList<Task> getHistory();
 
+    public HistoryManager clone();
 }
