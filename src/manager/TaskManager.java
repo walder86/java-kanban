@@ -7,7 +7,7 @@ import typeTasks.Task;
 import java.util.List;
 
 public interface TaskManager {
-    HistoryManager getHistoryManager();
+    List<Task> getHistory();
 
     List<Epic> getAllEpics();
 

@@ -4,7 +4,10 @@ import typeTasks.Epic;
 import typeTasks.SubTask;
 import typeTasks.Task;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -24,8 +27,8 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public HistoryManager getHistoryManager() {
-        return this.historyManager;
+    public List<Task> getHistory() {
+        return this.historyManager.getHistory();
     }
 
     @Override
