@@ -11,4 +11,6 @@ interface HistoryManager {
     List<Task> getHistory();
 
     HistoryManager clone();
+
+    void remove(Integer id);
 }
