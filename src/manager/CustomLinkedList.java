@@ -20,8 +20,7 @@ class CustomLinkedList {
         Node<Task> newNode = new Node<>(last, task, null);
         if (last == null) {
             first = newNode;
-        }
-        else {
+        } else {
             last.next = newNode;
         }
         last = newNode;
