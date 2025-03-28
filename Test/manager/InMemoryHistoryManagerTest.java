@@ -4,9 +4,9 @@ import enumeration.Status;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import typeTasks.Epic;
-import typeTasks.SubTask;
-import typeTasks.Task;
+import model.Epic;
+import model.SubTask;
+import model.Task;
 
 import java.util.List;
 

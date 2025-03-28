@@ -1,8 +1,8 @@
 import enumeration.Status;
 import manager.InMemoryTaskManager;
-import typeTasks.Epic;
-import typeTasks.SubTask;
-import typeTasks.Task;
+import model.Epic;
+import model.SubTask;
+import model.Task;
 
 public class Main {
 
