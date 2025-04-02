@@ -49,4 +49,10 @@ public class InMemoryHistoryManager implements HistoryManager {
         historyTasks.remove(id);
     }
 
+    @Override
+    public void clear() {
+        historyList.clear();
+        historyTasks.clear();
+    }
+
 }

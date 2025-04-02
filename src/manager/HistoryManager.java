@@ -13,4 +13,6 @@ interface HistoryManager {
     HistoryManager clone();
 
     void remove(Integer id);
+
+    void clear();
 }
