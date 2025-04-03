@@ -1,6 +1,5 @@
 package manager;
 
-import model.Epic;
 import model.Task;
 
 import java.util.List;
