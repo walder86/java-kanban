@@ -169,7 +169,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeAllTasks() {
         tasks.clear();
-        historyManager.clear();
+        historyManager.removeAllTasks();
         System.out.println("Все задачи удалены");
     }
 
@@ -177,6 +177,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllEpics() {
         epics.clear();
         subTasks.clear();
+        historyManager.removeAllEpics();
         System.out.println("Все эпики удалены");
     }
 
@@ -187,6 +188,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.changeStatus();
         }
         subTasks.clear();
+        historyManager.removeAllSubTasks();
         System.out.println("Все подзадачи удалены");
     }
 

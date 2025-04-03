@@ -1,5 +1,6 @@
 package manager;
 
+import model.Epic;
 import model.Task;
 
 import java.util.List;
@@ -14,5 +15,9 @@ interface HistoryManager {
 
     void remove(Integer id);
 
-    void clear();
+    void removeAllTasks();
+
+    void removeAllEpics();
+
+    void removeAllSubTasks();
 }

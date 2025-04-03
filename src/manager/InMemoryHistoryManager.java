@@ -1,7 +1,10 @@
 package manager;
 
+import model.Epic;
+import model.SubTask;
 import model.Task;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,9 +53,38 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     @Override
-    public void clear() {
-        historyList.clear();
-        historyTasks.clear();
+    public void removeAllTasks() {
+        List<Task> allTasks = getHistory();
+        for (Task task : allTasks) {
+            if (task.getClass() == Task.class) {
+                remove(task.getId());
+            }
+        }
+    }
+
+    @Override
+    public void removeAllEpics() {
+        List<Task> allTasks = getHistory();
+        for (Task task : allTasks) {
+            if (task.getClass() == Epic.class) {
+                Epic epic = (Epic) task;
+                List<SubTask> subTasks = epic.getSubTasks();
+                for (SubTask subTask : subTasks) {
+                    remove(subTask.getId());
+                }
+                remove(task.getId());
+            }
+        }
+    }
+
+    @Override
+    public void removeAllSubTasks() {
+        List<Task> allTasks = getHistory();
+        for (Task task : allTasks) {
+            if (task.getClass() == SubTask.class) {
+                remove(task.getId());
+            }
+        }
     }
 
 }
