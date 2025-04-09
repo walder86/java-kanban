@@ -12,7 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
-    private final String PATH = "tasks_file.csv";
+    private static final String PATH = "tasks_file.csv";
     private File file = new File(PATH);
     public static final String COMMA_SEPARATOR = ",";
 
