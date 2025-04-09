@@ -1,6 +1,6 @@
 package manager;
 
-import typeTasks.Task;
+import model.Task;
 
 import java.util.List;
 
@@ -11,4 +11,12 @@ interface HistoryManager {
     List<Task> getHistory();
 
     HistoryManager clone();
+
+    void remove(Integer id);
+
+    void removeAllTasks();
+
+    void removeAllEpics();
+
+    void removeAllSubTasks();
 }

@@ -1,8 +1,8 @@
-package typeTasks;
+package model;
 
 import enumeration.Status;
 
-public class SubTask extends Task{
+public class SubTask extends Task {
 
     private Integer epicId;
 

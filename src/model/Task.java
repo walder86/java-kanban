@@ -1,4 +1,4 @@
-package typeTasks;
+package model;
 
 import enumeration.Status;
 

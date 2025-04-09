@@ -1,8 +1,8 @@
 package manager;
 
-import typeTasks.Epic;
-import typeTasks.SubTask;
-import typeTasks.Task;
+import model.Epic;
+import model.SubTask;
+import model.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -169,6 +169,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeAllTasks() {
         tasks.clear();
+        historyManager.removeAllTasks();
         System.out.println("Все задачи удалены");
     }
 
@@ -176,6 +177,7 @@ public class InMemoryTaskManager implements TaskManager {
     public void removeAllEpics() {
         epics.clear();
         subTasks.clear();
+        historyManager.removeAllEpics();
         System.out.println("Все эпики удалены");
     }
 
@@ -186,12 +188,14 @@ public class InMemoryTaskManager implements TaskManager {
             epic.changeStatus();
         }
         subTasks.clear();
+        historyManager.removeAllSubTasks();
         System.out.println("Все подзадачи удалены");
     }
 
     @Override
     public void removeTaskById(Integer taskId) {
         tasks.remove(taskId);
+        historyManager.remove(taskId);
         System.out.println("Задача с ID = " + taskId + " была удалена");
     }
 
@@ -204,8 +208,10 @@ public class InMemoryTaskManager implements TaskManager {
         }
         for (SubTask subTask : epic.getSubTasks()) {
             subTasks.remove(subTask.getId());
+            historyManager.remove(subTask.getId());
         }
         epics.remove(epicId);
+        historyManager.remove(epicId);
         System.out.println("Эпик с ID = " + epicId + " был удален");
     }
 
@@ -221,6 +227,7 @@ public class InMemoryTaskManager implements TaskManager {
         epic.removeSubTask(subTask);
         epic.changeStatus();
         subTasks.remove(subTaskId);
+        historyManager.remove(subTaskId);
         System.out.println("Подзадача с ID = " + subTaskId + " была удалена");
     }
 

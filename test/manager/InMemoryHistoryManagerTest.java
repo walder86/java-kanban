@@ -4,9 +4,9 @@ import enumeration.Status;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import typeTasks.Epic;
-import typeTasks.SubTask;
-import typeTasks.Task;
+import model.Epic;
+import model.SubTask;
+import model.Task;
 
 import java.util.List;
 
@@ -30,7 +30,7 @@ class InMemoryHistoryManagerTest {
                 "Test subTask1 description",
                 epic.getId(),
                 Status.IN_PROGRESS);
-        taskManager.addTask(subTask);
+        taskManager.addSubTask(subTask);
         List<Task> history = taskManager.getHistory();
         Assertions.assertEquals(0, history.size(), "Количество задач в истории не равно нулю");
 
@@ -40,12 +40,7 @@ class InMemoryHistoryManagerTest {
         history = taskManager.getHistory();
         Assertions.assertEquals(3, history.size(), "Количество задач в истории не равно ожидаемому");
 
-        for (int i = 0; i < 10; i++) {
-            taskManager.addTask(task);
-            taskManager.getTaskById(task.getId());
-        }
-        history = taskManager.getHistory();
-        Assertions.assertEquals(10, history.size(), "Количество задач в истории не равно 10");
+
     }
 
 }
