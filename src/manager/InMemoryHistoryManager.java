@@ -1,5 +1,7 @@
 package manager;
 
+import custom.CustomLinkedList;
+import custom.Node;
 import model.Epic;
 import model.SubTask;
 import model.Task;
