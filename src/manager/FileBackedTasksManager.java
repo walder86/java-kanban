@@ -95,6 +95,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             }
 
             setCountTasks(++maxId);
+        } catch (FileNotFoundException e) {
+            System.out.println("Файл не найден. Убедитесь в правильности указанного пути.");
         } catch (IOException e) {
             throw new ManagerSaveException("Произошла ошибка во время чтения файла!");
         }

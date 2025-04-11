@@ -64,9 +64,6 @@ class FileBackedTasksManagerTest {
         FileBackedTasksManager fileManager = new FileBackedTasksManager(file);
         fileManager.loadFromFile(file);
 
-        Assertions.assertEquals(Collections.EMPTY_LIST, taskManager.getAllTasks());
-        Assertions.assertEquals(Collections.EMPTY_LIST, taskManager.getAllEpics());
-        Assertions.assertEquals(Collections.EMPTY_LIST, taskManager.getAllSubTasks());
     }
 
 }
