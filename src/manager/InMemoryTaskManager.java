@@ -26,6 +26,10 @@ public class InMemoryTaskManager implements TaskManager {
         this.historyManager = Manager.getDefaultHistoryManager();
     }
 
+    protected void setCountTasks(Integer countTasks) {
+        this.countTasks = countTasks;
+    }
+
     @Override
     public List<Task> getHistory() {
         return this.historyManager.getHistory();
@@ -229,6 +233,26 @@ public class InMemoryTaskManager implements TaskManager {
         subTasks.remove(subTaskId);
         historyManager.remove(subTaskId);
         System.out.println("Подзадача с ID = " + subTaskId + " была удалена");
+    }
+
+    protected void addTaskClone(Task task) {
+        tasks.put(task.getId(), task.clone());
+    }
+
+    protected void addEpicClone(Epic epic) {
+        epics.put(epic.getId(), epic.clone());
+    }
+
+    protected void addSubTaskClone(SubTask subTask) {
+        Epic epic = this.epics.get(subTask.getEpicId());
+        if (epic != null) {
+            epic.addSubTask(subTask.clone());
+            subTasks.put(subTask.getId(), subTask.clone());
+        } else {
+            //сделано добавление, так как можно обратиться к подзадаче и привязать её к нужному эпику
+            subTasks.put(subTask.getId(), subTask.clone());
+            System.out.println("Подзадача: \n" + subTask + "\n не привязана ни к одному Эпику. Необходимо добавить подзадачу в один иэ Эпиков");
+        }
     }
 
 }

@@ -51,7 +51,7 @@ class FileBackedTasksManagerTest {
         taskManager.addSubTask(subTask1);
 
         FileBackedTasksManager fileManager = new FileBackedTasksManager(file);
-        fileManager.loadFromFile();
+        fileManager.loadFromFile(file);
 
         Epic epicById = taskManager.getEpicById(epic.getId());
 
@@ -62,8 +62,7 @@ class FileBackedTasksManagerTest {
     @Test
     public void saveAndLoadEmptyTasksEpicsSubtasksTest() {
         FileBackedTasksManager fileManager = new FileBackedTasksManager(file);
-        fileManager.save();
-        fileManager.loadFromFile();
+        fileManager.loadFromFile(file);
 
         Assertions.assertEquals(Collections.EMPTY_LIST, taskManager.getAllTasks());
         Assertions.assertEquals(Collections.EMPTY_LIST, taskManager.getAllEpics());

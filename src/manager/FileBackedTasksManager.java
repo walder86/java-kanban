@@ -25,7 +25,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         this.file = file;
     }
 
-    public void save() {
+    private void save() {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
             bufferedWriter.write("id,type,name,status,description,epic\n"); // Запись шапки с заголовками в файл
             for (Task task : getAllTasks()) {
@@ -67,34 +67,41 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         return "";
     }
 
-    public void loadFromFile() {
+    public FileBackedTasksManager loadFromFile(File file) {
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
 
             String line = bufferedReader.readLine();
+            Integer maxId = 0;
             while (bufferedReader.ready()) {
                 line = bufferedReader.readLine();
-                if (line.equals("")) {
+                if (line.isEmpty()) {
                     break;
                 }
 
                 Task task = fromString(line);
 
                 if (task instanceof Epic epic) {
-                    addEpic(epic);
+                    addEpicClone(epic);
                 } else if (task instanceof SubTask subtask) {
-                    addSubTask(subtask);
+                    addSubTaskClone(subtask);
                 } else {
-                    addTask(task);
+                    addTaskClone(task);
+                }
+
+                if (task.getId() > maxId) {
+                    maxId = task.getId();
                 }
             }
 
+            setCountTasks(++maxId);
         } catch (IOException e) {
             throw new ManagerSaveException("Произошла ошибка во время чтения файла!");
         }
+        return this;
     }
 
-    private Task fromString(String value) {
+    private static Task fromString(String value) {
         String[] params = value.split(COMMA_SEPARATOR);
         int id = Integer.parseInt(params[0]);
         String type = params[1];
