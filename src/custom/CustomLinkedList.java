@@ -1,4 +1,4 @@
-package manager;
+package custom;
 
 import model.Task;
 
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-class CustomLinkedList {
+public class CustomLinkedList {
 
     public CustomLinkedList() {
 
