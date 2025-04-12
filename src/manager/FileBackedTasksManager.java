@@ -69,6 +69,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     public FileBackedTasksManager loadFromFile(File file) {
 
+        FileBackedTasksManager fileBackedTasksManager = new FileBackedTasksManager(file);
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
 
             String line = bufferedReader.readLine();
@@ -82,11 +83,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 Task task = fromString(line);
 
                 if (task instanceof Epic epic) {
-                    addEpicClone(epic);
+                    fileBackedTasksManager.addEpicClone(epic);
                 } else if (task instanceof SubTask subtask) {
-                    addSubTaskClone(subtask);
+                    fileBackedTasksManager.addSubTaskClone(subtask);
                 } else {
-                    addTaskClone(task);
+                    fileBackedTasksManager.addTaskClone(task);
                 }
 
                 if (task.getId() > maxId) {
@@ -94,13 +95,13 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 }
             }
 
-            setCountTasks(++maxId);
+            fileBackedTasksManager.setCountTasks(++maxId);
         } catch (FileNotFoundException e) {
             System.out.println("Файл не найден. Убедитесь в правильности указанного пути.");
         } catch (IOException e) {
             throw new ManagerSaveException("Произошла ошибка во время чтения файла!");
         }
-        return this;
+        return fileBackedTasksManager;
     }
 
     private static Task fromString(String value) {
