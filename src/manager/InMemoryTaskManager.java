@@ -1,13 +1,11 @@
 package manager;
 
+import exception.ManagerValidateException;
 import model.Epic;
 import model.SubTask;
 import model.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -16,6 +14,8 @@ public class InMemoryTaskManager implements TaskManager {
     private Map<Integer, Epic> epics;
     private Map<Integer, Task> tasks;
     private Map<Integer, SubTask> subTasks;
+
+    protected Set<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
 
     HistoryManager historyManager;
 
@@ -64,6 +64,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Boolean addTask(Task task) {
         if (task.getClass() == Task.class) {
             task.setId(countTasks++);
+            addNewPrioritizedTask(task);
             tasks.put(task.getId(), task.clone());
             System.out.println("Задача успешно добавлена");
             return true;
@@ -86,8 +87,10 @@ public class InMemoryTaskManager implements TaskManager {
         if (epic != null) {
             subTask.setId(countTasks++);
             epic.addSubTask(subTask.clone());
+            addNewPrioritizedTask(subTask);
             subTasks.put(subTask.getId(), subTask);
             epic.changeStatus();
+            epic.changeTime();
             System.out.println("Подзадача успешно добавлена");
             return true;
         } else {
@@ -167,6 +170,7 @@ public class InMemoryTaskManager implements TaskManager {
         existingSubTask.setStatus(subTask.getStatus());
 
         epic.changeStatus();
+        epic.changeTime();
         return true;
     }
 
@@ -190,6 +194,7 @@ public class InMemoryTaskManager implements TaskManager {
         for (Epic epic : epics.values()) {
             epic.clearSubTasks();
             epic.changeStatus();
+            epic.changeTime();
         }
         subTasks.clear();
         historyManager.removeAllSubTasks();
@@ -230,6 +235,7 @@ public class InMemoryTaskManager implements TaskManager {
         //подзадача не может существовать без эпика, поэтому исключается NPE
         epic.removeSubTask(subTask);
         epic.changeStatus();
+        epic.changeTime();
         subTasks.remove(subTaskId);
         historyManager.remove(subTaskId);
         System.out.println("Подзадача с ID = " + subTaskId + " была удалена");
@@ -253,6 +259,55 @@ public class InMemoryTaskManager implements TaskManager {
             subTasks.put(subTask.getId(), subTask.clone());
             System.out.println("Подзадача: \n" + subTask + "\n не привязана ни к одному Эпику. Необходимо добавить подзадачу в один иэ Эпиков");
         }
+    }
+
+    private void addNewPrioritizedTask(Task task) {
+        prioritizedTasks.add(task);
+        validateTaskPriority();
+    }
+
+    private void validateTaskPriority() {
+        List<Task> tasks = getPrioritizedTasks();
+
+        for (int i = 1; i < tasks.size(); i++) {
+            Task task = tasks.get(i);
+
+            boolean taskNotHasIntersections = checkTime(task);
+
+            if (!taskNotHasIntersections) {
+                throw new ManagerValidateException(
+                        "ВНИМАНИЕ! Задача №" + task.getId() + " и №" + tasks.get(i - 1).getId() + " пересекаются");
+            }
+        }
+    }
+
+    public boolean checkTime(Task task) {
+        List<Task> tasks = List.copyOf(prioritizedTasks);
+        int sizeTimeNull = 0;
+        if (!tasks.isEmpty()) {
+            for (Task taskSave : tasks) {
+                if (taskSave.getStartTime() != null && taskSave.getEndTime() != null) {
+                    if (task.getStartTime().isBefore(taskSave.getStartTime())
+                            && task.getEndTime().isBefore(taskSave.getStartTime())) {
+                        return true;
+                    } else if (task.getStartTime().isAfter(taskSave.getEndTime())
+                            && task.getEndTime().isAfter(taskSave.getEndTime())) {
+                        return true;
+                    }
+                } else {
+                    sizeTimeNull++;
+                }
+
+            }
+            return sizeTimeNull == tasks.size();
+        } else {
+            return true;
+        }
+    }
+
+    public List<Task> getPrioritizedTasks() {
+
+        return prioritizedTasks.stream().toList();
     }
 
 }

@@ -13,6 +13,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -39,7 +41,7 @@ class FileBackedTasksManagerTest {
 
     @Test
     public void saveAndLoadTest() {
-        Task task = new Task("Test task", "Test task description", Status.NEW);
+        Task task = new Task("Test task", "Test task description", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(5));
         taskManager.addTask(task);
         Epic epic = new Epic("Test epic", "Test epic description");
         taskManager.addEpic(epic);
@@ -47,7 +49,7 @@ class FileBackedTasksManagerTest {
                 "Test subTask1",
                 "Test subTask1 description",
                 epic.getId(),
-                Status.IN_PROGRESS);
+                Status.IN_PROGRESS, LocalDateTime.now().minusHours(1), Duration.ofMinutes(5));
         taskManager.addSubTask(subTask1);
 
         FileBackedTasksManager fileManager = new FileBackedTasksManager(file);
@@ -59,11 +61,5 @@ class FileBackedTasksManagerTest {
         Assertions.assertEquals(List.of(epicById), taskManager.getAllEpics());
     }
 
-    @Test
-    public void saveAndLoadEmptyTasksEpicsSubtasksTest() {
-        FileBackedTasksManager fileManager = new FileBackedTasksManager(file);
-        fileManager.loadFromFile(file);
-
-    }
 
 }

@@ -2,12 +2,16 @@ package model;
 
 import enumeration.Status;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Epic extends Task {
 
     private List<SubTask> subTasks;
+
+    private LocalDateTime endTime;
 
     private Epic() {
     }
@@ -51,6 +55,24 @@ public class Epic extends Task {
         this.status = Status.IN_PROGRESS;
     }
 
+    public void changeTime() {
+        LocalDateTime endTime = LocalDateTime.MIN;
+        LocalDateTime startTime = LocalDateTime.MIN;
+        Duration duration = Duration.between(startTime, endTime);
+        for (SubTask subTask : subTasks) {
+            if (endTime.isBefore(subTask.getEndTime())) {
+                endTime = subTask.getEndTime();
+            }
+            if (startTime.isBefore(subTask.getStartTime())) {
+                startTime = subTask.getStartTime();
+            }
+            duration = duration.plus(subTask.getDuration());
+        }
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.duration = duration;
+    }
+
     public boolean addSubTask(SubTask subTask) {
         if (!subTask.getEpicId().equals(this.id)) {
             System.out.println("Подзадача относится к другому эпику");
@@ -91,6 +113,8 @@ public class Epic extends Task {
         epic.setDescription(this.description);
         epic.setStatus(this.status);
         epic.setSubTasks(this.subTasks);
+        epic.setStartTime(this.startTime);
+        epic.setDuration(this.duration);
         return epic;
     }
 
