@@ -185,8 +185,9 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void removeAllTasks() {
         Task task = new Task("Test task", "Test task description", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(5));
+        Task task2 = new Task("Test task2", "Test task2 description", Status.NEW, LocalDateTime.now().minusHours(1), Duration.ofMinutes(5));
         taskManager.addTask(task);
-        taskManager.addTask(task);
+        taskManager.addTask(task2);
         taskManager.removeAllTasks();
         List<Task> allTasks = taskManager.getAllTasks();
         Assertions.assertEquals(0, allTasks.size(), "Список задач не был очищен");

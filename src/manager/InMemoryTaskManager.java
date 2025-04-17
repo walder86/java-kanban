@@ -62,9 +62,10 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Boolean addTask(Task task) {
+        validateTaskPriority(task);
         if (task.getClass() == Task.class) {
             task.setId(countTasks++);
-            addNewPrioritizedTask(task);
+            addNewPrioritizedTask(task.clone());
             tasks.put(task.getId(), task.clone());
             System.out.println("Задача успешно добавлена");
             return true;
@@ -83,11 +84,12 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Boolean addSubTask(SubTask subTask) {
+        validateTaskPriority(subTask);
         Epic epic = this.epics.get(subTask.getEpicId());
         if (epic != null) {
             subTask.setId(countTasks++);
             epic.addSubTask(subTask.clone());
-            addNewPrioritizedTask(subTask);
+            addNewPrioritizedTask(subTask.clone());
             subTasks.put(subTask.getId(), subTask);
             epic.changeStatus();
             epic.changeTime();
@@ -131,6 +133,8 @@ public class InMemoryTaskManager implements TaskManager {
             return false;
         }
         tasks.put(task.getId(), task);
+        removePrioritizedTask(task.getId());
+        addNewPrioritizedTask(task.clone());
         return true;
     }
 
@@ -163,11 +167,11 @@ public class InMemoryTaskManager implements TaskManager {
         epic.removeSubTask(subTask);
         epic.addSubTask(subTask.clone());
 
-        //не обновляем id, так как они равны (первое условие)
-        //не обновляем epicId, так как они равны
-        existingSubTask.setName(subTask.getName());
-        existingSubTask.setDescription(subTask.getDescription());
-        existingSubTask.setStatus(subTask.getStatus());
+        //id и epicId равны, поэтому изменяться только имя, описание и статус
+        subTasks.put(subTask.getId(), subTask.clone());
+
+        removePrioritizedTask(subTask.getId());
+        addNewPrioritizedTask(subTask.clone());
 
         epic.changeStatus();
         epic.changeTime();
@@ -176,6 +180,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllTasks() {
+        tasks.keySet()
+                .forEach(this::removePrioritizedTask);
         tasks.clear();
         historyManager.removeAllTasks();
         System.out.println("Все задачи удалены");
@@ -196,6 +202,8 @@ public class InMemoryTaskManager implements TaskManager {
             epic.changeStatus();
             epic.changeTime();
         }
+        subTasks.keySet()
+                .forEach(this::removePrioritizedTask);
         subTasks.clear();
         historyManager.removeAllSubTasks();
         System.out.println("Все подзадачи удалены");
@@ -203,6 +211,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTaskById(Integer taskId) {
+        removePrioritizedTask(taskId);
         tasks.remove(taskId);
         historyManager.remove(taskId);
         System.out.println("Задача с ID = " + taskId + " была удалена");
@@ -236,6 +245,7 @@ public class InMemoryTaskManager implements TaskManager {
         epic.removeSubTask(subTask);
         epic.changeStatus();
         epic.changeTime();
+        removePrioritizedTask(subTaskId);
         subTasks.remove(subTaskId);
         historyManager.remove(subTaskId);
         System.out.println("Подзадача с ID = " + subTaskId + " была удалена");
@@ -243,6 +253,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     protected void addTaskClone(Task task) {
         tasks.put(task.getId(), task.clone());
+        addNewPrioritizedTask(task.clone());
     }
 
     protected void addEpicClone(Epic epic) {
@@ -253,61 +264,55 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = this.epics.get(subTask.getEpicId());
         if (epic != null) {
             epic.addSubTask(subTask.clone());
-            subTasks.put(subTask.getId(), subTask.clone());
         } else {
-            //сделано добавление, так как можно обратиться к подзадаче и привязать её к нужному эпику
-            subTasks.put(subTask.getId(), subTask.clone());
             System.out.println("Подзадача: \n" + subTask + "\n не привязана ни к одному Эпику. Необходимо добавить подзадачу в один иэ Эпиков");
         }
+        //сделано добавление, так как можно обратиться к подзадаче и привязать её к нужному эпику
+        addNewPrioritizedTask(subTask.clone());
+        subTasks.put(subTask.getId(), subTask.clone());
     }
 
     private void addNewPrioritizedTask(Task task) {
         prioritizedTasks.add(task);
-        validateTaskPriority();
     }
 
-    private void validateTaskPriority() {
+    private boolean validateTaskPriority(Task task) {
         List<Task> tasks = getPrioritizedTasks();
 
-        for (int i = 1; i < tasks.size(); i++) {
-            Task task = tasks.get(i);
-
-            boolean taskNotHasIntersections = checkTime(task);
-
-            if (!taskNotHasIntersections) {
-                throw new ManagerValidateException(
-                        "ВНИМАНИЕ! Задача №" + task.getId() + " и №" + tasks.get(i - 1).getId() + " пересекаются");
+        if (!tasks.isEmpty()) {
+            for (Task prioritizedTask : tasks) {
+                boolean validate = checkTime(prioritizedTask, task);
+                if (!validate) {
+                    throw new ManagerValidateException(
+                            "ВНИМАНИЕ! Новая задача пересекается с задачей " + prioritizedTask);
+                }
             }
         }
+        return true;
     }
 
-    public boolean checkTime(Task task) {
-        List<Task> tasks = List.copyOf(prioritizedTasks);
-        int sizeTimeNull = 0;
-        if (!tasks.isEmpty()) {
-            for (Task taskSave : tasks) {
-                if (taskSave.getStartTime() != null && taskSave.getEndTime() != null) {
-                    if (task.getStartTime().isBefore(taskSave.getStartTime())
-                            && task.getEndTime().isBefore(taskSave.getStartTime())) {
-                        return true;
-                    } else if (task.getStartTime().isAfter(taskSave.getEndTime())
-                            && task.getEndTime().isAfter(taskSave.getEndTime())) {
-                        return true;
-                    }
-                } else {
-                    sizeTimeNull++;
-                }
-
-            }
-            return sizeTimeNull == tasks.size();
-        } else {
+    public boolean checkTime(Task existTask, Task newTask) {
+        if (newTask.getStartTime().isBefore(existTask.getStartTime())
+                && newTask.getEndTime().isBefore(existTask.getStartTime())) {
             return true;
+        } else if (newTask.getStartTime().isAfter(existTask.getEndTime())
+                && newTask.getEndTime().isAfter(existTask.getEndTime())) {
+            return true;
+        } else {
+            return false;
         }
     }
 
     public List<Task> getPrioritizedTasks() {
-
         return prioritizedTasks.stream().toList();
+    }
+
+    public void removePrioritizedTask(Integer id) {
+        List<Task> prioritizedTasks = getPrioritizedTasks();
+        prioritizedTasks.stream()
+                .filter(prioritizedTask -> prioritizedTask.getId().equals(id))
+                .findAny()
+                .ifPresent(prioritizedTask -> this.prioritizedTasks.remove(prioritizedTask));
     }
 
 }
