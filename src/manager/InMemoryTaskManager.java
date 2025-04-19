@@ -62,8 +62,8 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Boolean addTask(Task task) {
-        validateTaskPriority(task);
         if (task.getClass() == Task.class) {
+            validateTaskPriority(task);
             task.setId(countTasks++);
             addNewPrioritizedTask(task.clone());
             tasks.put(task.getId(), task.clone());
@@ -84,9 +84,9 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public Boolean addSubTask(SubTask subTask) {
-        validateTaskPriority(subTask);
         Epic epic = this.epics.get(subTask.getEpicId());
         if (epic != null) {
+            validateTaskPriority(subTask);
             subTask.setId(countTasks++);
             epic.addSubTask(subTask.clone());
             addNewPrioritizedTask(subTask.clone());
@@ -132,8 +132,9 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Задача не найдена. Для добавления воспользуйтесь другим методом");
             return false;
         }
+        validateTaskPriority(task);
         tasks.put(task.getId(), task);
-        removePrioritizedTask(task.getId());
+        removePrioritizedTask(task);
         addNewPrioritizedTask(task.clone());
         return true;
     }
@@ -162,6 +163,8 @@ public class InMemoryTaskManager implements TaskManager {
             return false;
         }
 
+        validateTaskPriority(subTask);
+
         Epic epic = epics.get(subTask.getEpicId());
         //подзадача не может существовать без эпика, поэтому исключается NPE
         epic.removeSubTask(subTask);
@@ -170,7 +173,7 @@ public class InMemoryTaskManager implements TaskManager {
         //id и epicId равны, поэтому изменяться только имя, описание и статус
         subTasks.put(subTask.getId(), subTask.clone());
 
-        removePrioritizedTask(subTask.getId());
+        removePrioritizedTask(subTask);
         addNewPrioritizedTask(subTask.clone());
 
         epic.changeStatus();
@@ -180,7 +183,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeAllTasks() {
-        tasks.keySet()
+        tasks.values()
                 .forEach(this::removePrioritizedTask);
         tasks.clear();
         historyManager.removeAllTasks();
@@ -190,6 +193,8 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeAllEpics() {
         epics.clear();
+        subTasks.values()
+                .forEach(this::removePrioritizedTask);
         subTasks.clear();
         historyManager.removeAllEpics();
         System.out.println("Все эпики удалены");
@@ -202,7 +207,7 @@ public class InMemoryTaskManager implements TaskManager {
             epic.changeStatus();
             epic.changeTime();
         }
-        subTasks.keySet()
+        subTasks.values()
                 .forEach(this::removePrioritizedTask);
         subTasks.clear();
         historyManager.removeAllSubTasks();
@@ -211,7 +216,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTaskById(Integer taskId) {
-        removePrioritizedTask(taskId);
+        removePrioritizedTask(tasks.get(taskId));
         tasks.remove(taskId);
         historyManager.remove(taskId);
         System.out.println("Задача с ID = " + taskId + " была удалена");
@@ -225,6 +230,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         for (SubTask subTask : epic.getSubTasks()) {
+            prioritizedTasks.remove(subTask);
             subTasks.remove(subTask.getId());
             historyManager.remove(subTask.getId());
         }
@@ -245,7 +251,7 @@ public class InMemoryTaskManager implements TaskManager {
         epic.removeSubTask(subTask);
         epic.changeStatus();
         epic.changeTime();
-        removePrioritizedTask(subTaskId);
+        removePrioritizedTask(subTasks.get(subTaskId));
         subTasks.remove(subTaskId);
         historyManager.remove(subTaskId);
         System.out.println("Подзадача с ID = " + subTaskId + " была удалена");
@@ -276,11 +282,16 @@ public class InMemoryTaskManager implements TaskManager {
         prioritizedTasks.add(task);
     }
 
-    private boolean validateTaskPriority(Task task) {
+    private void validateTaskPriority(Task task) {
         List<Task> tasks = getPrioritizedTasks();
 
         if (!tasks.isEmpty()) {
             for (Task prioritizedTask : tasks) {
+                //равенство может быть только в случае обновления,
+                //чтобы одна и та же задача не рассматривались на пересечение
+                if (Objects.equals(task.getId(), prioritizedTask.getId())) {
+                    continue;
+                }
                 boolean validate = checkTime(prioritizedTask, task);
                 if (!validate) {
                     throw new ManagerValidateException(
@@ -288,7 +299,6 @@ public class InMemoryTaskManager implements TaskManager {
                 }
             }
         }
-        return true;
     }
 
     public boolean checkTime(Task existTask, Task newTask) {
@@ -307,12 +317,8 @@ public class InMemoryTaskManager implements TaskManager {
         return prioritizedTasks.stream().toList();
     }
 
-    public void removePrioritizedTask(Integer id) {
-        List<Task> prioritizedTasks = getPrioritizedTasks();
-        prioritizedTasks.stream()
-                .filter(prioritizedTask -> prioritizedTask.getId().equals(id))
-                .findAny()
-                .ifPresent(prioritizedTask -> this.prioritizedTasks.remove(prioritizedTask));
+    public void removePrioritizedTask(Task task) {
+        prioritizedTasks.remove(task);
     }
 
 }
