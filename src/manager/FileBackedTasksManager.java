@@ -9,6 +9,8 @@ import model.Task;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class FileBackedTasksManager extends InMemoryTaskManager {
 
@@ -27,7 +29,7 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     private void save() {
         try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
-            bufferedWriter.write("id,type,name,status,description,epic\n"); // Запись шапки с заголовками в файл
+            bufferedWriter.write("id,type,name,status,description,epic,startTime,duration\n"); // Запись шапки с заголовками в файл
             for (Task task : getAllTasks()) {
                 bufferedWriter.write(toString(task));
             }
@@ -48,7 +50,9 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
                 task.getName() + "," +
                 task.getStatus().toString() + "," +
                 task.getDescription() + "," +
-                getParentEpicId(task) + "\n";
+                getParentEpicId(task) + "," +
+                task.getStartTime() + "," +
+                (task.getDuration() == null ? ",\n" : task.getDuration().getSeconds() / 60 + "\n");
     }
 
     private TaskType getType(Task task) {
@@ -112,6 +116,8 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
         Status status = Status.valueOf(params[3].toUpperCase());
         String description = params[4];
         Integer epicId = type.equals("SUBTASK") ? Integer.parseInt(params[5]) : null;
+        LocalDateTime startTime = LocalDateTime.parse(params[6]);
+        Duration duration = Duration.ofMinutes(Integer.parseInt(params[7]));
 
         if (type.equals("EPIC")) {
             Epic epic = new Epic(name, description);
@@ -119,11 +125,11 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
             epic.setStatus(status);
             return epic;
         } else if (type.equals("SUBTASK")) {
-            SubTask subtask = new SubTask(name, description, epicId, status);
+            SubTask subtask = new SubTask(name, description, epicId, status, startTime, duration);
             subtask.setId(id);
             return subtask;
         } else {
-            Task task = new Task(name, description, status);
+            Task task = new Task(name, description, status, startTime, duration);
             task.setId(id);
             return task;
         }

@@ -1,13 +1,11 @@
 package manager;
 
+import exception.ManagerValidateException;
 import model.Epic;
 import model.SubTask;
 import model.Task;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class InMemoryTaskManager implements TaskManager {
 
@@ -16,6 +14,8 @@ public class InMemoryTaskManager implements TaskManager {
     private Map<Integer, Epic> epics;
     private Map<Integer, Task> tasks;
     private Map<Integer, SubTask> subTasks;
+
+    protected Set<Task> prioritizedTasks = new TreeSet<>(Comparator.comparing(Task::getStartTime));
 
     HistoryManager historyManager;
 
@@ -63,7 +63,9 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Boolean addTask(Task task) {
         if (task.getClass() == Task.class) {
+            validateTaskPriority(task);
             task.setId(countTasks++);
+            addNewPrioritizedTask(task.clone());
             tasks.put(task.getId(), task.clone());
             System.out.println("Задача успешно добавлена");
             return true;
@@ -84,10 +86,13 @@ public class InMemoryTaskManager implements TaskManager {
     public Boolean addSubTask(SubTask subTask) {
         Epic epic = this.epics.get(subTask.getEpicId());
         if (epic != null) {
+            validateTaskPriority(subTask);
             subTask.setId(countTasks++);
             epic.addSubTask(subTask.clone());
+            addNewPrioritizedTask(subTask.clone());
             subTasks.put(subTask.getId(), subTask);
             epic.changeStatus();
+            epic.changeTime();
             System.out.println("Подзадача успешно добавлена");
             return true;
         } else {
@@ -127,7 +132,10 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Задача не найдена. Для добавления воспользуйтесь другим методом");
             return false;
         }
+        validateTaskPriority(task);
         tasks.put(task.getId(), task);
+        removePrioritizedTask(task);
+        addNewPrioritizedTask(task.clone());
         return true;
     }
 
@@ -155,23 +163,28 @@ public class InMemoryTaskManager implements TaskManager {
             return false;
         }
 
+        validateTaskPriority(subTask);
+
         Epic epic = epics.get(subTask.getEpicId());
         //подзадача не может существовать без эпика, поэтому исключается NPE
         epic.removeSubTask(subTask);
         epic.addSubTask(subTask.clone());
 
-        //не обновляем id, так как они равны (первое условие)
-        //не обновляем epicId, так как они равны
-        existingSubTask.setName(subTask.getName());
-        existingSubTask.setDescription(subTask.getDescription());
-        existingSubTask.setStatus(subTask.getStatus());
+        //id и epicId равны, поэтому изменяться только имя, описание и статус
+        subTasks.put(subTask.getId(), subTask.clone());
+
+        removePrioritizedTask(subTask);
+        addNewPrioritizedTask(subTask.clone());
 
         epic.changeStatus();
+        epic.changeTime();
         return true;
     }
 
     @Override
     public void removeAllTasks() {
+        tasks.values()
+                .forEach(this::removePrioritizedTask);
         tasks.clear();
         historyManager.removeAllTasks();
         System.out.println("Все задачи удалены");
@@ -180,6 +193,8 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void removeAllEpics() {
         epics.clear();
+        subTasks.values()
+                .forEach(this::removePrioritizedTask);
         subTasks.clear();
         historyManager.removeAllEpics();
         System.out.println("Все эпики удалены");
@@ -190,7 +205,10 @@ public class InMemoryTaskManager implements TaskManager {
         for (Epic epic : epics.values()) {
             epic.clearSubTasks();
             epic.changeStatus();
+            epic.changeTime();
         }
+        subTasks.values()
+                .forEach(this::removePrioritizedTask);
         subTasks.clear();
         historyManager.removeAllSubTasks();
         System.out.println("Все подзадачи удалены");
@@ -198,6 +216,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     @Override
     public void removeTaskById(Integer taskId) {
+        removePrioritizedTask(tasks.get(taskId));
         tasks.remove(taskId);
         historyManager.remove(taskId);
         System.out.println("Задача с ID = " + taskId + " была удалена");
@@ -211,6 +230,7 @@ public class InMemoryTaskManager implements TaskManager {
             return;
         }
         for (SubTask subTask : epic.getSubTasks()) {
+            prioritizedTasks.remove(subTask);
             subTasks.remove(subTask.getId());
             historyManager.remove(subTask.getId());
         }
@@ -230,6 +250,8 @@ public class InMemoryTaskManager implements TaskManager {
         //подзадача не может существовать без эпика, поэтому исключается NPE
         epic.removeSubTask(subTask);
         epic.changeStatus();
+        epic.changeTime();
+        removePrioritizedTask(subTasks.get(subTaskId));
         subTasks.remove(subTaskId);
         historyManager.remove(subTaskId);
         System.out.println("Подзадача с ID = " + subTaskId + " была удалена");
@@ -237,6 +259,7 @@ public class InMemoryTaskManager implements TaskManager {
 
     protected void addTaskClone(Task task) {
         tasks.put(task.getId(), task.clone());
+        addNewPrioritizedTask(task.clone());
     }
 
     protected void addEpicClone(Epic epic) {
@@ -247,12 +270,55 @@ public class InMemoryTaskManager implements TaskManager {
         Epic epic = this.epics.get(subTask.getEpicId());
         if (epic != null) {
             epic.addSubTask(subTask.clone());
-            subTasks.put(subTask.getId(), subTask.clone());
         } else {
-            //сделано добавление, так как можно обратиться к подзадаче и привязать её к нужному эпику
-            subTasks.put(subTask.getId(), subTask.clone());
             System.out.println("Подзадача: \n" + subTask + "\n не привязана ни к одному Эпику. Необходимо добавить подзадачу в один иэ Эпиков");
         }
+        //сделано добавление, так как можно обратиться к подзадаче и привязать её к нужному эпику
+        addNewPrioritizedTask(subTask.clone());
+        subTasks.put(subTask.getId(), subTask.clone());
+    }
+
+    private void addNewPrioritizedTask(Task task) {
+        prioritizedTasks.add(task);
+    }
+
+    private void validateTaskPriority(Task task) {
+        List<Task> tasks = getPrioritizedTasks();
+
+        if (!tasks.isEmpty()) {
+            for (Task prioritizedTask : tasks) {
+                //равенство может быть только в случае обновления,
+                //чтобы одна и та же задача не рассматривались на пересечение
+                if (Objects.equals(task.getId(), prioritizedTask.getId())) {
+                    continue;
+                }
+                boolean validate = checkTime(prioritizedTask, task);
+                if (!validate) {
+                    throw new ManagerValidateException(
+                            "ВНИМАНИЕ! Новая задача пересекается с задачей " + prioritizedTask);
+                }
+            }
+        }
+    }
+
+    public boolean checkTime(Task existTask, Task newTask) {
+        if (newTask.getStartTime().isBefore(existTask.getStartTime())
+                && newTask.getEndTime().isBefore(existTask.getStartTime())) {
+            return true;
+        } else if (newTask.getStartTime().isAfter(existTask.getEndTime())
+                && newTask.getEndTime().isAfter(existTask.getEndTime())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public List<Task> getPrioritizedTasks() {
+        return prioritizedTasks.stream().toList();
+    }
+
+    public void removePrioritizedTask(Task task) {
+        prioritizedTasks.remove(task);
     }
 
 }
