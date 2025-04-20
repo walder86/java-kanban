@@ -56,36 +56,30 @@ public class InMemoryHistoryManager implements HistoryManager {
     @Override
     public void removeAllTasks() {
         List<Task> allTasks = getHistory();
-        for (Task task : allTasks) {
-            if (task.getClass() == Task.class) {
-                remove(task.getId());
-            }
-        }
+        allTasks.stream()
+                .filter(task -> task.getClass() == Task.class)
+                .forEach(task -> remove(task.getId()));
     }
 
     @Override
     public void removeAllEpics() {
         List<Task> allTasks = getHistory();
-        for (Task task : allTasks) {
-            if (task.getClass() == Epic.class) {
-                Epic epic = (Epic) task;
-                List<SubTask> subTasks = epic.getSubTasks();
-                for (SubTask subTask : subTasks) {
-                    remove(subTask.getId());
-                }
-                remove(task.getId());
-            }
-        }
+        allTasks.stream()
+                .filter(task -> task.getClass() == Epic.class)
+                .forEach(task -> {
+                    Epic epic = (Epic) task;
+                    List<SubTask> subTasks = epic.getSubTasks();
+                    subTasks.forEach(subTask -> remove(subTask.getId()));
+                    remove(task.getId());
+                });
     }
 
     @Override
     public void removeAllSubTasks() {
         List<Task> allTasks = getHistory();
-        for (Task task : allTasks) {
-            if (task.getClass() == SubTask.class) {
-                remove(task.getId());
-            }
-        }
+        allTasks.stream()
+                .filter(task -> task.getClass() == SubTask.class)
+                .forEach(task -> remove(task.getId()));
     }
 
 }

@@ -2,6 +2,9 @@ package model;
 
 import enumeration.Status;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+
 public class SubTask extends Task {
 
     private Integer epicId;
@@ -10,8 +13,8 @@ public class SubTask extends Task {
 
     }
 
-    public SubTask(String name, String description, Integer epicId, Status status) {
-        super(name, description, status);
+    public SubTask(String name, String description, Integer epicId, Status status, LocalDateTime startTime, Duration duration) {
+        super(name, description, status, startTime, duration);
         this.epicId = epicId;
     }
 
@@ -30,6 +33,8 @@ public class SubTask extends Task {
         subTask.setDescription(this.description);
         subTask.setStatus(this.status);
         subTask.setEpicId(this.epicId);
+        subTask.setStartTime(this.startTime);
+        subTask.setDuration(this.duration);
         return subTask;
     }
 
