@@ -57,7 +57,7 @@ public class InMemoryTaskManager implements TaskManager {
             System.out.println("Эпик не найден по ID = " + epicId);
             return new ArrayList<>();
         }
-        return epic.getSubTasks();
+        return new ArrayList<>(epic.getSubTasks());
     }
 
     @Override
@@ -104,22 +104,31 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public Task getTaskById(Integer taskId) {
         Task task = tasks.get(taskId);
-        historyManager.addTask(task);
-        return task;
+        if (task != null) {
+            historyManager.addTask(task);
+            return task;
+        }
+        return null;
     }
 
     @Override
     public Epic getEpicById(Integer epicId) {
         Epic epic = epics.get(epicId);
-        historyManager.addTask(epic);
-        return epic;
+        if (epic != null) {
+            historyManager.addTask(epic);
+            return epic;
+        }
+        return null;
     }
 
     @Override
     public SubTask getSubTaskById(Integer subTaskId) {
         SubTask subTask = subTasks.get(subTaskId);
-        historyManager.addTask(subTask);
-        return subTask;
+        if (subTask != null) {
+            historyManager.addTask(subTask);
+            return subTask;
+        }
+        return null;
     }
 
     @Override
@@ -313,6 +322,7 @@ public class InMemoryTaskManager implements TaskManager {
         }
     }
 
+    @Override
     public List<Task> getPrioritizedTasks() {
         return prioritizedTasks.stream().toList();
     }
