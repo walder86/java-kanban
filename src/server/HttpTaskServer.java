@@ -13,15 +13,14 @@ public class HttpTaskServer {
     private final HttpServer httpServer;
 
     public HttpTaskServer(TaskManager manager) throws IOException, InterruptedException {
-        TaskManager taskManager = manager;
         this.httpServer = HttpServer.create();
         httpServer.bind(new InetSocketAddress(PORT), 0);
-        httpServer.createContext("/task", new TaskHandler(taskManager));
-        httpServer.createContext("/epic", new EpicHandler(taskManager));
-        httpServer.createContext("/epic/subtasks", new SubtaskByEpicHandler(taskManager));
-        httpServer.createContext("/subtask", new SubtaskHandler(taskManager));
-        httpServer.createContext("/history", new HistoryHandler(taskManager));
-        httpServer.createContext("/prioritized", new PrioritizedTasksHandler(taskManager));
+        httpServer.createContext("/task", new TaskHandler(manager));
+        httpServer.createContext("/epic", new EpicHandler(manager));
+        httpServer.createContext("/epic/subtasks", new SubtaskByEpicHandler(manager));
+        httpServer.createContext("/subtask", new SubtaskHandler(manager));
+        httpServer.createContext("/history", new HistoryHandler(manager));
+        httpServer.createContext("/prioritized", new PrioritizedTasksHandler(manager));
     }
 
     public void start() {

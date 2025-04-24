@@ -73,10 +73,10 @@ public class EpicHandler extends BaseHttpHandler implements HttpHandler {
                         statusCode = StatusCode.CODE_200.getCode();
                         response = "Эпик обновлен";
                     } else {
-                        boolean epicCreated = taskManager.addEpic(epic);
-                        if (epicCreated) {
+                        Epic epicCreated = taskManager.addEpic(epic);
+                        if (epicCreated != null) {
                             statusCode = StatusCode.CODE_201.getCode();
-                            response = ("Эпик создан");
+                            response = ("Эпик с id = " + epicCreated.getId() + " создан");
                         } else {
                             statusCode = StatusCode.CODE_400.getCode();
                             response = ("Неверный формат эпика");

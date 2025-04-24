@@ -73,10 +73,10 @@ public class SubtaskHandler extends BaseHttpHandler implements HttpHandler {
                         statusCode = StatusCode.CODE_200.getCode();
                         response = "Подзадача обновлена";
                     } else {
-                        boolean subtaskCreated = taskManager.addSubTask(subtask);
-                        if (subtaskCreated) {
+                        SubTask subtaskCreated = taskManager.addSubTask(subtask);
+                        if (subtaskCreated != null) {
                             statusCode = StatusCode.CODE_201.getCode();
-                            response = ("Подзадача создана");
+                            response = ("Подзадача с id = " + subtaskCreated.getId() + " создана");
                         } else {
                             statusCode = StatusCode.CODE_400.getCode();
                             response = ("Неверный формат подзадачи");

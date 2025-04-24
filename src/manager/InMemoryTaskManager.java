@@ -61,29 +61,29 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public Boolean addTask(Task task) {
+    public Task addTask(Task task) {
         if (task.getClass() == Task.class) {
             validateTaskPriority(task);
             task.setId(countTasks++);
             addNewPrioritizedTask(task.clone());
             tasks.put(task.getId(), task.clone());
             System.out.println("Задача успешно добавлена");
-            return true;
+            return task;
         } else {
-            return false;
+            return null;
         }
     }
 
     @Override
-    public Boolean addEpic(Epic epic) {
+    public Epic addEpic(Epic epic) {
         epic.setId(countTasks++);
         epics.put(epic.getId(), epic.clone());
         System.out.println("Эпик успешно добавлен");
-        return true;
+        return epic;
     }
 
     @Override
-    public Boolean addSubTask(SubTask subTask) {
+    public SubTask addSubTask(SubTask subTask) {
         Epic epic = this.epics.get(subTask.getEpicId());
         if (epic != null) {
             validateTaskPriority(subTask);
@@ -94,10 +94,10 @@ public class InMemoryTaskManager implements TaskManager {
             epic.changeStatus();
             epic.changeTime();
             System.out.println("Подзадача успешно добавлена");
-            return true;
+            return subTask;
         } else {
             System.out.println("Эпик не найден");
-            return false;
+            return null;
         }
     }
 

@@ -137,30 +137,30 @@ public class FileBackedTasksManager extends InMemoryTaskManager {
 
     // Переопределение методов
     @Override
-    public Boolean addTask(Task task) {
-        if (super.addTask(task)) {
+    public Task addTask(Task task) {
+        Task taskNew = super.addTask(task);
+        if (taskNew != null) {
             save();
-            return true;
+            return taskNew;
         }
-        return false;
+        return null;
     }
 
     @Override
-    public Boolean addEpic(Epic epic) {
-        if (super.addEpic(epic)) {
-            save();
-            return true;
-        }
-        return false;
+    public Epic addEpic(Epic epic) {
+        Epic epicNew = super.addEpic(epic);
+        save();
+        return  epicNew;
     }
 
     @Override
-    public Boolean addSubTask(SubTask subTask) {
-        if (super.addSubTask(subTask)) {
+    public SubTask addSubTask(SubTask subTask) {
+        SubTask subTaskNew = super.addSubTask(subTask);
+        if (subTaskNew != null) {
             save();
-            return true;
+            return subTaskNew;
         }
-        return false;
+        return null;
     }
 
     @Override

@@ -73,10 +73,10 @@ public class TaskHandler extends BaseHttpHandler implements HttpHandler {
                         statusCode = StatusCode.CODE_201.getCode();
                         response = "Задача обновлена";
                     } else {
-                        boolean taskCreated = taskManager.addTask(task);
-                        if (taskCreated) {
+                        Task taskCreated = taskManager.addTask(task);
+                        if (taskCreated != null) {
                             statusCode = StatusCode.CODE_201.getCode();
-                            response = ("Задача создана");
+                            response = ("Задача с id = " + taskCreated.getId() + " создана");
                         } else {
                             statusCode = StatusCode.CODE_400.getCode();
                             response = ("Неверный формат задачи");
