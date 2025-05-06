@@ -30,8 +30,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     @Test
     void addTask() {
         Task task = new Task("Test task", "Test task description", Status.NEW, LocalDateTime.now(), Duration.ofMinutes(5));
-        boolean checkAddTask = taskManager.addTask(task);
-        Assertions.assertTrue(checkAddTask, "Задача не была добавлена");
+        Task taskNew = taskManager.addTask(task);
+        Assertions.assertNotNull(taskNew, "Задача не была добавлена");
 
         Task taskFromManager = taskManager.getTaskById(task.getId());
         Assertions.assertNotNull(taskFromManager, "Полученная задача равна null");
@@ -47,11 +47,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
     void addEpic() {
         Epic epic = new Epic("Test epic", "Test epic description");
 
-        boolean checkAddTask = taskManager.addTask(epic);
-        Assertions.assertFalse(checkAddTask, "Недопустима вставка эпика в список задач");
-
-        boolean checkAddEpic = taskManager.addEpic(epic);
-        Assertions.assertTrue(checkAddEpic, "Эпик не был добавлен");
+        Epic epicNew = taskManager.addEpic(epic);
+        Assertions.assertNotNull(epicNew, "Эпик не был добавлен");
 
         Epic epicFromManager = taskManager.getEpicById(epic.getId());
         Assertions.assertNotNull(epicFromManager, "Полученный эпик равен null");
@@ -74,20 +71,18 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 "Test subTask1 description",
                 10,
                 Status.IN_PROGRESS, LocalDateTime.now(), Duration.ofMinutes(5));
-        Boolean checkAddSubTask = taskManager.addSubTask(subTask1);
-        Assertions.assertFalse(checkAddSubTask, "Подзадача не может быть добавлена к несуществующему эпику");
+        SubTask subTaskNew = taskManager.addSubTask(subTask1);
+        Assertions.assertNull(subTaskNew, "Подзадача не может быть добавлена к несуществующему эпику");
 
         subTask1 = new SubTask(
                 "Test subTask1",
                 "Test subTask1 description",
                 epic.getId(),
                 Status.IN_PROGRESS, LocalDateTime.now(), Duration.ofMinutes(5));
-        Boolean checkAddTask = taskManager.addTask(subTask1);
-        Assertions.assertFalse(checkAddTask, "Недопустима вставка подзадачи в список задач");
 
-        checkAddSubTask = taskManager.addSubTask(subTask1);
+        subTaskNew = taskManager.addSubTask(subTask1);
         Epic epicById = taskManager.getEpicById(epic.getId());
-        Assertions.assertTrue(checkAddSubTask, "Не найден эпик для подзадачи");
+        Assertions.assertNotNull(subTaskNew, "Не найден эпик для подзадачи");
         Assertions.assertEquals(Status.IN_PROGRESS, epicById.getStatus());
 
         SubTask subTaskFromManager = taskManager.getSubTaskById(subTask1.getId());

@@ -17,11 +17,11 @@ public interface TaskManager {
 
     List<SubTask> getAllSubTasksForEpic(Integer epicId);
 
-    Boolean addTask(Task task);
+    Task addTask(Task task);
 
-    Boolean addEpic(Epic epic);
+    Epic addEpic(Epic epic);
 
-    Boolean addSubTask(SubTask subTask);
+    SubTask addSubTask(SubTask subTask);
 
     Task getTaskById(Integer taskId);
 
@@ -46,4 +46,6 @@ public interface TaskManager {
     void removeEpicById(Integer epicId);
 
     void removeSubTaskById(Integer subTaskId);
+
+    List<Task> getPrioritizedTasks();
 }
